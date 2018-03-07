@@ -6,5 +6,8 @@
   "repository": "https://github.com/SHHam12/SH-coin.git",
   "author": "Suk Hwa Ham (sanham1992@gmail.com)",
   "license": "MIT",
-  "private": false
+  "private": false,
+  "dependencies": {
+    "crypto-js": "^3.1.9-1"
+  }
 }
