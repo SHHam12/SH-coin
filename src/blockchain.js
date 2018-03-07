@@ -17,3 +17,13 @@ const genesisBlock = new Block(
 );
 
 let blockchain = [genesisBlock];
+
+const getLastBlock = () => blockchain[blockchain.length - 1];
+
+const getTimestamp = () => new Date().getDate() / 1000;
+
+const createNewBlock = data => {
+  const previousBlock = getLastBlock();
+  const newBlockIndex = previousBlock.index + 1;
+  const newTimestamp = getTimestamp();
+};
