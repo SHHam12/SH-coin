@@ -1,0 +1,10 @@
+{
+  "name": "SH-coin",
+  "version": "1.0.0",
+  "description": "SH-coin with NodeJS",
+  "main": "src/server.js",
+  "repository": "https://github.com/SHHam12/SH-coin.git",
+  "author": "Suk Hwa Ham (sanham1992@gmail.com)",
+  "license": "MIT",
+  "private": false
+}
