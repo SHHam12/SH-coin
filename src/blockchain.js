@@ -1,8 +1,8 @@
 const CryptoJS = require("crypto-js");
 
 class Block {
-  constructor(index, hash, previousHash, timestamp, data){
-    this.index =index;
+  constructor(index, hash, previousHash, timestamp, data) {
+    this.index = index;
     this.hash = hash;
     this.previousHash = previousHash;
     this.timestamp = timestamp;
@@ -22,7 +22,7 @@ let blockchain = [genesisBlock];
 
 const getLastBlock = () => blockchain[blockchain.length - 1];
 
-const getTimestamp = () => new Date().getDate() / 1000;
+const getTimestamp = () => new Date().getTime() / 1000;
 
 const getBlockchain = () => blockchain;
 
@@ -44,7 +44,7 @@ const createNewBlock = data => {
   const newBlock = new Block(
     newBlockIndex,
     newHash,
-    previousHash,
+    previousBlock.hash,
     newTimestamp,
     data
   );
@@ -114,8 +114,8 @@ const replaceChain = candidateChain => {
   }
 };
 
-const addBlockToChain = newBlock => {
-  if (isNewBlockValid(newBlock, getLastBlock())) {
+const addBlockToChain = candidateBlock => {
+  if (isNewBlockValid(candidateBlock, getLastBlock())) {
     getBlockchain().push(candidateBlock);
     return true;
   } else {
