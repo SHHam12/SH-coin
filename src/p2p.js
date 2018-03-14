@@ -1,6 +1,36 @@
-const WebSockets = require("ws");
+const WebSockets = require("ws"),
+  Blockchain = require("./blockchain");
+
+const { getLastBlock } = Blockchain;
 
 const sockets = [];
+
+// Message Types
+const GET_LATEST = "GET_LATEST";
+const GET_ALL = "GET_ALL";
+const BLOCKCHAIN_RESPONSE = "BLOCKCHAIN_RESPONSE";
+
+// Message Creators
+const getLatest = () => {
+  return {
+    type: GET_LATEST,
+    data: null
+  };
+};
+
+const getAll = () => {
+  return {
+    type: GET_ALL,
+    data: null
+  };
+};
+
+const blockchainresponse = () => {
+  return {
+    type: BLOCKCHAIN_RESPONSE,
+    data
+  };
+};
 
 const getSockets = () => sockets;
 
@@ -12,16 +42,17 @@ const startP2PServer = server => {
   console.log("SH-coin P2P Server Running");
 };
 
-const initSocketConnection = socket => {
-  sockets.push(socket);
-  handleSocketError(socket);
-  socket.on("message", (data) => {
-    console.log(data);
-  });
-  setTimeout(() => {
-     socket.send("welcome"); 
-  }, 5000);
+const initSocketConnection = ws => {
+  sockets.push(ws);
+  handleSocketMessages(ws);
+  handleSocketError(ws);
 };
+
+const handleSocketMessages = ws => {
+  ws.on("message", data => {
+    
+  })
+}
 
 const handleSocketError = ws => {
   const closeSocketConnection = ws => {
