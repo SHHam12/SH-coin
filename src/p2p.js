@@ -1,11 +1,17 @@
 const WebSockets = require("ws"),
   Blockchain = require("./blockchain");
 
-const { getNewestBlock, isBlockStructureValid, replaceChain } = Blockchain;
+const {
+  getNewestBlock,
+  isBlockStructureValid,
+  replaceChain,
+  getBlockchain,
+  addBlockToChain
+} = Blockchain;
 
 const sockets = [];
 
-// Message Types
+// Messages Types
 const GET_LATEST = "GET_LATEST";
 const GET_ALL = "GET_ALL";
 const BLOCKCHAIN_RESPONSE = "BLOCKCHAIN_RESPONSE";
@@ -25,7 +31,7 @@ const getAll = () => {
   };
 };
 
-const blockchainresponse = () => {
+const blockchainResponse = data => {
   return {
     type: BLOCKCHAIN_RESPONSE,
     data
@@ -46,13 +52,13 @@ const initSocketConnection = ws => {
   sockets.push(ws);
   handleSocketMessages(ws);
   handleSocketError(ws);
-  sendMessage(ws, getLatest())
+  sendMessage(ws, getLatest());
 };
 
 const parseData = data => {
   try {
-    return JSON.parse(data)
-  } catch(e) {
+    return JSON.parse(data);
+  } catch (e) {
     console.log(e);
     return null;
   }
@@ -69,9 +75,12 @@ const handleSocketMessages = ws => {
       case GET_LATEST:
         sendMessage(ws, responseLatest());
         break;
+      case GET_ALL:
+        sendMessage(ws, responseAll());
+        break;
       case BLOCKCHAIN_RESPONSE:
-        const receivedBlocks = message.data
-        if (receivedBlocks === null){
+        const receivedBlocks = message.data;
+        if (receivedBlocks === null) {
           break;
         }
         handleBlockchainResponse(receivedBlocks);
@@ -81,21 +90,21 @@ const handleSocketMessages = ws => {
 };
 
 const handleBlockchainResponse = receivedBlocks => {
-  if (receivedBlocks.length === 0){
+  if (receivedBlocks.length === 0) {
     console.log("Received blocks have a length of 0");
     return;
   }
   const latestBlockReceived = receivedBlocks[receivedBlocks.length - 1];
-  if (!isBlockStructureValid(latestBlockReceived)){
+  if (!isBlockStructureValid(latestBlockReceived)) {
     console.log("The block structure of the block received is not valid");
     return;
   }
   const newestBlock = getNewestBlock();
-  if (latestBlockReceived.index > newestBlock.index){
-    if (newestBlock.hash === latestBlockReceived.previousHash){
+  if (latestBlockReceived.index > newestBlock.index) {
+    if (newestBlock.hash === latestBlockReceived.previousHash) {
       addBlockToChain(latestBlockReceived);
     } else if (receivedBlocks.length === 1) {
-      // to do, get all the blocks, we are way behind
+      sendMessageToAll(getAll());
     } else {
       replaceChain(receivedBlocks);
     }
@@ -104,11 +113,16 @@ const handleBlockchainResponse = receivedBlocks => {
 
 const sendMessage = (ws, message) => ws.send(JSON.stringify(message));
 
-const responseLatest = () => blockchainresponse([getNewestBlock()]);
+const sendMessageToAll = message =>
+  sockets.forEach(ws => sendMessage(ws, message));
+
+const responseLatest = () => blockchainResponse([getNewestBlock()]);
+
+const responseAll = () => blockchainResponse(getBlockchain());
 
 const handleSocketError = ws => {
   const closeSocketConnection = ws => {
-    ws.close()
+    ws.close();
     sockets.splice(sockets.indexOf(ws), 1);
   };
   ws.on("close", () => closeSocketConnection(ws));

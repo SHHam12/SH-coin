@@ -6,7 +6,7 @@ POST http://localhost:4000/blocks
 content-type: application/json
 
 {
-    "data": "Second block Yay"
+    "data": "Third block Yay"
 }
 
 ###
