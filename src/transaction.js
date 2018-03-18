@@ -71,4 +71,15 @@ const updateUTxOuts = (newTxs, uTxOutList) => {
       });
     })
     .reduce((a, b) => a.contact(b), []);
+
+  const spendTxOuts = newTxs
+    .map(tx => tx.txIns)
+    .reduce((a, b) => a.concat(b), [])
+    .map(txIn => new UTxOut(txIn, txOutId, txIn.txOutIndex, "", 0));
+
+  const resultingUTxOuts = uTxOutList.filter(
+    uTxO => !findUTxOut(uTxO.txOutId, uTxO.txOutIndex, spendTxOuts))
+    .concat(newUTxOuts);
+
+  return resultingUTxOuts;
 };
