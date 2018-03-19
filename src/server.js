@@ -3,9 +3,11 @@ const express = require("express"),
   morgan = require("morgan"),
   Blockchain = require("./blockchain");
   P2P = require("./p2p");
+  Wallet = require("./wallet");
 
 const { getBlockchain, createNewBlock } = Blockchain;
 const { startP2PServer, connectToPeers } = P2P;
+const { initWallet } = Wallet;
 
 const PORT = process.env.HTTP_PORT || 4000;
 
@@ -33,4 +35,5 @@ const server = app.listen(PORT, () =>
   console.log(`SH-coin HTTP Server is running on port ${PORT}`)
 );
 
+initWallet();
 startP2PServer(server);
