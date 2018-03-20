@@ -14,8 +14,8 @@ class TxOut { // transaction output
 }
 
 class TxIn { // transaction input
-  // uTxOutId
-  // uTxOutIndex
+  // txOutId
+  // txOutIndex
   // Signature
 }
 
@@ -54,10 +54,10 @@ const findUTxOut = (txOutId, txOutIndex, uTxOutList) => {
   );
 };
 
-const signTxIn = (tx, txInIndex, privateKey, uTxOut) => {
+const signTxIn = (tx, txInIndex, privateKey, uTxOutList) => {
   const txIn = tx.txIns[txInIndex];
   const dataToSign = tx.id;
-  const referencedUTxOut = findUTxOut(txIn.txOutId, tx.txOutIndex, uTxOuts);
+  const referencedUTxOut = findUTxOut(txIn.txOutId, tx.txOutIndex, uTxOutList);
   if (referencedUTxOut === null) {
     console.log("Couldn't find the referenced uTxOut, not signing");
     return;
@@ -71,12 +71,12 @@ const signTxIn = (tx, txInIndex, privateKey, uTxOut) => {
   return signature;
 };
 
-const getPublicKey = (privateKey) => {
+const getPublicKey = privateKey => {
   return ec
     .keyFromPrivate(privateKey, "hex")
     .getPublic()
     .encode("hex");
-}
+};
 
 const updateUTxOuts = (newTxs, uTxOutList) => {
   const newUTxOuts = newTxs
@@ -85,17 +85,16 @@ const updateUTxOuts = (newTxs, uTxOutList) => {
         new UTxOut(tx.id, index, txOut.address, txOut.amount);
       });
     })
-    .reduce((a, b) => a.contact(b), []);
+    .reduce((a, b) => a.concat(b), []);
 
-  const spendTxOuts = newTxs
+  const spentTxOuts = newTxs
     .map(tx => tx.txIns)
     .reduce((a, b) => a.concat(b), [])
-    .map(txIn => new UTxOut(txIn, txOutId, txIn.txOutIndex, "", 0));
+    .map(txIn => new UTxOut(txIn.txOutId, txIn.txOutIndex, "", 0));
 
-  const resultingUTxOuts = uTxOutList.filter(
-    uTxO => !findUTxOut(uTxO.txOutId, uTxO.txOutIndex, spendTxOuts))
+  const resultingUTxOuts = uTxOutList
+    .filter(uTxO => !findUTxOut(uTxO.txOutId, uTxO.txOutIndex, spentTxOuts))
     .concat(newUTxOuts);
-
   return resultingUTxOuts;
 };
 
@@ -198,21 +197,21 @@ const validateTxIn = (txIn, tx, uTxOutList) => {
   }
 };
 
-const getAmountInTxIn = (txIn, uTxOutList) => 
+const getAmountInTxIn = (txIn, uTxOutList) =>
   findUTxOut(txIn.txOutId, txIn.txOutIndex, uTxOutList).amount;
 
 const validateTx = (tx, uTxOutList) => {
-  if (!isTxStructureValid) {
+  if (!isTxStructureValid(tx)) {
     console.log("Tx structure is invalid");
     return false;
   }
 
-  if (getTxID(tx) !== tx.id) {
+  if (getTxId(tx) !== tx.id) {
     console.log("Tx ID is not valid");
     return false;
   }
 
-  const hasValidTxIns = tx.txIns.map(txIn => 
+  const hasValidTxIns = tx.txIns.map(txIn =>
     validateTxIn(txIn, tx, uTxOutList)
   );
 
@@ -264,4 +263,13 @@ const validateCoinbaseTx = (tx, blockIndex) => {
   } else {
     return true;
   }
+};
+
+module.exports = {
+  getPublicKey,
+  getTxId,
+  signTxIn,
+  TxIn,
+  Transaction,
+  TxOut
 };
