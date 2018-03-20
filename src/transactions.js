@@ -34,8 +34,6 @@ class UTxOut { // unspend transaction output
   }
 }
 
-let uTxOuts = [];
-
 const getTxId = tx => {
 
   const txInContent = tx.txIns
