@@ -79,11 +79,12 @@ const getPublicKey = privateKey => {
 
 const updateUTxOuts = (newTxs, uTxOutList) => {
   const newUTxOuts = newTxs
-    .map(tx => {
-      tx.txOuts.map((txOut, index) => {
-        new UTxOut(tx.id, index, txOut.address, txOut.amount);
-      });
-    })
+    .map(tx =>
+      tx.txOuts.map(
+        (txOut, index) =>
+          new UTxOut(tx.id, index, txOut.address, txOut.amount)
+      )
+    )
     .reduce((a, b) => a.concat(b), []);
 
   const spentTxOuts = newTxs
@@ -268,7 +269,8 @@ const createCoinbaseTx = (address, blockIndex) => {
   const tx = new Transaction();
   const txIn = new TxIn();
   txIn.signature = "";
-  txIn.txOutId = blockIndex;
+  txIn.txOutId = "";
+  txIn.txOutIndex = blockIndex;
   tx.txIns = [txIn];
   tx.txOuts = [new TxOut(address, COINBASE_AMOUNT)];
   tx.id = getTxId(tx);
@@ -297,7 +299,7 @@ const validateBlockTxs = (txs, uTxOutList, blockIndex) => {
   }
 
   const txIns = _(txs)
-    .map(tx => tx.Ins)
+    .map(tx => tx.txIns)
     .flatten()
     .value();
 
