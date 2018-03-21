@@ -1,5 +1,6 @@
 const CryptoJS = require("crypto-js")
   elliptic = require("elliptic"),
+  _ = require("lodash"),
   utils = require("./utils");
 
 const ec = new elliptic.ec("secp256k1");
@@ -35,7 +36,6 @@ class UTxOut { // unspend transaction output
 }
 
 const getTxId = tx => {
-
   const txInContent = tx.txIns
     .map(txIn => txIn.txOutId + txIn.txOutIndex)
     .reduce((a, b) => a + b, "");
@@ -43,6 +43,7 @@ const getTxId = tx => {
   const txOutContent = tx.txOuts
     .map(txOut => txOut.address + txOut.amount)
     .reduce((a, b) => a + b, "");
+
   return CryptoJS.SHA256(txInContent + txOutContent + tx.timestamp).toString();
 };
 
@@ -268,12 +269,56 @@ const createCoinbaseTx = (address, blockIndex) => {
   const txIn = new TxIn();
   txIn.signature = "";
   txIn.txOutId = blockIndex;
-  tx.txIns[txIn];
-  tx.txOut = [new TxOut(address, COINBASE_AMOUNT)];
+  tx.txIns = [txIn];
+  tx.txOuts = [new TxOut(address, COINBASE_AMOUNT)];
   tx.id = getTxId(tx);
   return tx;
 };
 
+const hasDuplicates = txIns => {
+  const groups = _.countBy(txIns, txIn => txIn.txOutId + txIn.txOutIndex);
+
+  return _(groups)
+    .map(value => {
+      if (value > 1) {
+        console.log("Found a duplicated txIn");
+        return true;
+      } else {
+        return false;
+      }
+    })
+    .includes(true);
+};
+
+const validateBlockTxs = (txs, uTxOutList, blockIndex) => {
+  const coinbaseTx = txs[0];
+  if (!validateCoinbaseTx(coinbaseTx, blockIndex)) {
+    console.log("Coinbase Tx is invalid");
+  }
+
+  const txIns = _(txs)
+    .map(tx => tx.Ins)
+    .flatten()
+    .value();
+
+  if (hasDuplicates(txIns)) {
+    console.log("Found duplicated txIns");
+    return false;
+  }
+
+  const nonCoinbaseTxs = txs.slice(1);
+
+  return nonCoinbaseTxs
+    .map(tx => validateTx(tx, uTxOutList))
+    .reduce((a, b) => a + b, true);
+};
+
+const processTxs = (txs, uTxOutList, blockIndex) => {
+  if (!validateBlockTxs(txs, uTxOutList, blockIndex)) {
+    return null;
+  }
+  return updateUTxOuts(txs, uTxOutList);
+};
 
 module.exports = {
   getPublicKey,
@@ -282,5 +327,6 @@ module.exports = {
   TxIn,
   Transaction,
   TxOut,
-  createCoinbaseTx
+  createCoinbaseTx,
+  processTxs
 };

@@ -5,10 +5,10 @@ const CryptoJS = require("crypto-js"),
 
 const { getBalance, getPublicFromWallet } = Wallet;
 
-const { createCoinbaseTx } = Transactions;
+const { createCoinbaseTx, processTxs } = Transactions;
 
 const BLOCK_GENERATION_INTERVAL = 10;
-const DIFFICULTY_ADJUSTMENT_INTERVAL = 10;
+const DIFFICULTY_ADJUSMENT_INTERVAL = 10;
 
 class Block {
   constructor(index, hash, previousHash, timestamp, data, difficulty, nonce) {
@@ -76,22 +76,22 @@ const createNewRawBlock = data => {
 const findDifficulty = () => {
   const newestBlock = getNewestBlock();
   if (
-    newestBlock.index % DIFFICULTY_ADJUSTMENT_INTERVAL === 0 && 
+    newestBlock.index % DIFFICULTY_ADJUSMENT_INTERVAL === 0 &&
     newestBlock.index !== 0
   ) {
     return calculateNewDifficulty(newestBlock, getBlockchain());
   } else {
     return newestBlock.difficulty;
   }
-}
+};
 
 const calculateNewDifficulty = (newestBlock, blockchain) => {
   const lastCalculatedBlock = 
-    blockchain[blockchain.length - DIFFICULTY_ADJUSTMENT_INTERVAL];
+    blockchain[blockchain.length - DIFFICULTY_ADJUSMENT_INTERVAL];
   const timeExpected = 
-    BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUSTMENT_INTERVAL;
+    BLOCK_GENERATION_INTERVAL * DIFFICULTY_ADJUSMENT_INTERVAL;
   const timeTaken = newestBlock.timestamp - lastCalculatedBlock.timestamp;
-  if (timeTaken < timeExpected/2) {
+  if (timeTaken < timeExpected / 2) {
     return lastCalculatedBlock.difficulty + 1;
   } else if (timeTaken > timeExpected * 2) {
     return lastCalculatedBlock.difficulty - 1;
@@ -102,7 +102,7 @@ const calculateNewDifficulty = (newestBlock, blockchain) => {
 
 const findBlock = (index, previousHash, timestamp, data, difficulty) => {
   let nonce = 0;
-  while(true){
+  while (true) {
     console.log("Current nonce", nonce);
     const hash = createHash(
       index,
@@ -124,18 +124,18 @@ const findBlock = (index, previousHash, timestamp, data, difficulty) => {
         nonce
       );
     }
-    nonce++
+    nonce++;
   }
-}
+};
 
 const hashMatchesDifficulty = (hash, difficulty) => {
   const hashInBinary = hexToBinary(hash);
-  const requireZeros = "0".repeat(difficulty);
+  const requiredZeros = "0".repeat(difficulty);
   console.log("Trying difficulty:", difficulty, "with hash", hashInBinary);
-  return hashInBinary.startsWith(requireZeros);
-}
+  return hashInBinary.startsWith(requiredZeros);
+};
 
-const getBlockHash = (block) => 
+const getBlocksHash = block =>
   createHash(
     block.index, 
     block.previousHash, 
@@ -152,29 +152,29 @@ const isTimeStampValid = (newBlock, oldBlock) => {
   );
 };
 
-const isBlockValid = (candidateBlock, lastestBlock) => {
+const isBlockValid = (candidateBlock, latestBlock) => {
   if (!isBlockStructureValid(candidateBlock)) {
-    console.log("The candidate block  structure is not valid");
+    console.log("The candidate block structure is not valid");
     return false;
-  } else if (lastestBlock.index + 1 !== candidateBlock.index) {
-      console.log("The candidate block does not have a valid index");
+  } else if (latestBlock.index + 1 !== candidateBlock.index) {
+    console.log("The candidate block doesnt have a valid index");
       return false;
-  } else if (lastestBlock.hash !== candidateBlock.previousHash) {
+  } else if (latestBlock.hash !== candidateBlock.previousHash) {
     console.log(
-      "The previousHash of the candidate block is not the hash of the lastest block"
+      "The previousHash of the candidate block is not the hash of the latest block"
     );
     return false;
-  } else if (getBlockHash(candidateBlock) !== candidateBlock.hash) {
+  } else if (getBlocksHash(candidateBlock) !== candidateBlock.hash) {
     console.log("The hash of this block is invalid"); 
     return false;
-  } else if (!isTimeStampValid(candidateBlock, lastestBlock)) {
-    console.log("The timestamp of the block is dodge");
+  } else if (!isTimeStampValid(candidateBlock, latestBlock)) {
+    console.log("The timestamp of this block is dodgy");
     return false;
   }
   return true;
 };
 
-const isBlockStructureValid = (block) => {
+const isBlockStructureValid = block => {
   return (
     typeof block.index === "number" && 
     typeof block.hash === "string" &&
@@ -184,7 +184,7 @@ const isBlockStructureValid = (block) => {
   );
 };
 
-const isChainValid = (candidateChain) => {
+const isChainValid = candidateChain => {
   const isGenesisValid = block => {
     return JSON.stringify(block) === JSON.stringify(genesisBlock);
   };
@@ -194,7 +194,7 @@ const isChainValid = (candidateChain) => {
     );
     return false;
   }
-  for(let i = 1; i < candidateChain.length; i ++) {
+  for (let i = 1; i < candidateChain.length; i++) {
     if (!isBlockValid(candidateChain[i], candidateChain[i - 1])) {
         return false;
     }
@@ -222,7 +222,19 @@ const replaceChain = candidateChain => {
 
 const addBlockToChain = candidateBlock => {
   if (isBlockValid(candidateBlock, getNewestBlock())) {
-    getBlockchain().push(candidateBlock);
+    const processedTxs = processTxs(
+      candidateBlock.data,
+      uTxOuts,
+      candidateBlock.index
+    );
+    if (processedTxs === null) {
+      console.log("Couldnt process txs");
+      return false;
+    } else {
+      blockchain.push(candidateBlock);
+      uTxOuts = processedTxs;
+      return true;
+    }
     return true;
   } else {
     return false;
@@ -232,9 +244,9 @@ const addBlockToChain = candidateBlock => {
 const getAccountBalance = () => getBalance(getPublicFromWallet(), uTxOuts);
 
 module.exports = {
+  getNewestBlock,
   getBlockchain,
   createNewBlock,
-  getNewestBlock,
   isBlockStructureValid,
   addBlockToChain,
   replaceChain,
