@@ -255,7 +255,13 @@ const getUTxOutList = () => _.cloneDeep(uTxOuts);
 const getAccountBalance = () => getBalance(getPublicFromWallet(), uTxOuts);
 
 const sendTx = (address, amount) => {
-  const tx = createTx(address, amount, getPrivateFromWallet(), getUTxOutList());
+  const tx = createTx(
+    address, 
+    amount, 
+    getPrivateFromWallet(), 
+    getUTxOutList(), 
+    getMempool()
+  );
   addToMempool(tx, getUTxOutList());
   return tx;
 };
