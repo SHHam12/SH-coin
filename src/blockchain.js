@@ -31,19 +31,31 @@ class Block {
   }
 }
 
+const genesisTx = {
+  txIns: [{ signature: "", txOutId: "", txOutIndex: 0 }],
+  txOuts: [
+    {
+      address:
+        "04666d1ecd0240db02a311e6e88ac320f996ffcae6884637fdac2780b13ab83836f7bb95bb2306af6680d0e8f18fd6004e19583265588a8a8d9f5f3b2fea149903",
+      amount: 50
+    }
+  ],
+  id: "b0149647859c68e936fd4c190cbb82e2c65a49df742d920eb7175c5d47a060fb"
+};
+
 const genesisBlock = new Block(
   0,
-  "d7fe651764cd6b9a2488b8fa07ee8c80733f79068937e68fc0f9b8481361ad61",
+  "416d4383d9e7977449a2918ae2b25dcc150961de19d6744f5d577c807f8a2434",
   null,
   1521323896,
-  "This is the genesis~",
+  [genesisTx],
   0,
   0
 );
 
 let blockchain = [genesisBlock];
 
-let uTxOuts = [];
+let uTxOuts = processTxs(blockchain[0].data, [], 0);
 
 const getNewestBlock = () => blockchain[blockchain.length - 1];
 
@@ -263,6 +275,7 @@ const sendTx = (address, amount) => {
     getUTxOutList(),
     getMempool()
   );
+  console.log(getMempool());
   addToMempool(tx, getUTxOutList());
   return tx;
 };
