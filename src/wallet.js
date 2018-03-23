@@ -55,7 +55,7 @@ const findAmountInUTxOuts = (amountNeeded, myUTxOuts) => {
   const includedUTxOuts = [];
   for (const myUTxOut of myUTxOuts) {
     includedUTxOuts.push(myUTxOut);
-    currentAmount = currentAmount = myUTxOut.amount;
+    currentAmount = currentAmount + myUTxOut.amount;
     if (currentAmount >= amountNeeded) {
       const leftOverAmount = currentAmount - amountNeeded;
       return { includedUTxOuts, leftOverAmount };
@@ -97,11 +97,11 @@ const filterUTxOutsFromMempool = (uTxOutList, mempool) => {
   return _.without(uTxOutList, ...removables);
 };
 
-const createTx = (receiverAddress, amount, privateKey, uTxOutList, mempool) => {
+const createTx = (receiverAddress, amount, privateKey, uTxOutList, memPool) => {
   const myAddress = getPublicKey(privateKey);
   const myUTxOuts = uTxOutList.filter(uTxO => uTxO.address === myAddress);
 
-const filteredUTxOuts = filterUTxOutsFromMempool(uTxOutList, mempool);
+  const filteredUTxOuts = filterUTxOutsFromMempool(myUTxOuts, memPool);
 
   const { includedUTxOuts, leftOverAmount } = findAmountInUTxOuts(
     amount,
@@ -128,6 +128,7 @@ const filteredUTxOuts = filterUTxOutsFromMempool(uTxOutList, mempool);
     txIn.signature = signTxIn(tx, index, privateKey, uTxOutList);
     return txIn;
   });
+
   return tx;
 };
 

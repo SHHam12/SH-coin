@@ -1,4 +1,4 @@
-const CryptoJS = require("crypto-js")
+const CryptoJS = require("crypto-js"),
   elliptic = require("elliptic"),
   _ = require("lodash"),
   utils = require("./utils");
@@ -85,8 +85,7 @@ const updateUTxOuts = (newTxs, uTxOutList) => {
   const newUTxOuts = newTxs
     .map(tx =>
       tx.txOuts.map(
-        (txOut, index) =>
-          new UTxOut(tx.id, index, txOut.address, txOut.amount)
+        (txOut, index) => new UTxOut(tx.id, index, txOut.address, txOut.amount)
       )
     )
     .reduce((a, b) => a.concat(b), []);

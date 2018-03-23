@@ -45,7 +45,7 @@ const startP2PServer = server => {
   wsServer.on("connection", ws => {
     initSocketConnection(ws);
   });
-  console.log("SH-coin P2P Server Running");
+  console.log("Nomadcoin P2P Server running");
 };
 
 const initSocketConnection = ws => {
@@ -102,10 +102,9 @@ const handleBlockchainResponse = receivedBlocks => {
   const newestBlock = getNewestBlock();
   if (latestBlockReceived.index > newestBlock.index) {
     if (newestBlock.hash === latestBlockReceived.previousHash) {
-      if(addBlockToChain(latestBlockReceived)) {
+      if (addBlockToChain(latestBlockReceived)) {
         broadcastNewBlock();
       }
-      addBlockToChain(latestBlockReceived);
     } else if (receivedBlocks.length === 1) {
       sendMessageToAll(getAll());
     } else {

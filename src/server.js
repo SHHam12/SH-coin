@@ -1,8 +1,8 @@
 const express = require("express"),
   bodyParser = require("body-parser"),
   morgan = require("morgan"),
-  Blockchain = require("./blockchain");
-  P2P = require("./p2p");
+  Blockchain = require("./blockchain"),
+  P2P = require("./p2p"),
   Wallet = require("./wallet");
 
 const { getBlockchain, createNewBlock, getAccountBalance, sendTx } = Blockchain;
@@ -36,10 +36,9 @@ app.get("/me/balance", (req, res) => {
   res.send({ balance });
 });
 
-app.route("/transactions")
-  .get((req, res) => {
-
-  })
+app
+  .route("/transactions")
+  .get((req, res) => {})
   .post((req, res) => {
     try {
       const { body: { address, amount } } = req;
@@ -49,10 +48,10 @@ app.route("/transactions")
         const resPonse = sendTx(address, amount);
         res.send(resPonse);
       }
-    } catch(e) {
+    } catch (e) {
       res.status(400).send(e.message);
     }
-  })
+  });
 
 const server = app.listen(PORT, () => 
   console.log(`SH-coin HTTP Server is running on port ${PORT}`)
