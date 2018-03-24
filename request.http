@@ -17,10 +17,22 @@ content-type: application/json
 GET http://localhost:4000/me/balance
 
 ###
-GET http://localhost:4000/me/address
+GET http://localhost:4500/me/balance
+
+###
+GET http://localhost:4500/me/address
 
 ###
 POST http://localhost:4000/transactions/
+content-type: application/json
+
+{
+    "address": "04666d1ecd0240db02a311e6e88ac320f996ffcae6884637fdac2780b13ab83836f7bb95bb2306af6680d0e8f18fd6004e19583265588a8a8d9f5f3b2fea149903",
+    "amount": 10
+}
+
+###
+POST http://localhost:4500/transactions/
 content-type: application/json
 
 {

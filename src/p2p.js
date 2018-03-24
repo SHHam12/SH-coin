@@ -191,5 +191,7 @@ module.exports = {
   startP2PServer,
   connectToPeers,
   broadcastNewBlock,
+  broadcastMempool,
+  broadcastNewBlock,
   broadcastMempool
 };
