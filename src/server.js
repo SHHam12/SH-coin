@@ -53,6 +53,17 @@ app.get("/blocks/:hash", (req, res) => {
   }
 });
 
+app.get("/transactions/:id", (req, res) => {
+  const { params: { id} } = req;
+  console.log(id);
+  const transaction = _.find(getMempool(), { id });
+  if (transaction === undefined) {
+    res.status(400).send("Transaction not found");
+  } else {
+    res.send(transaction);
+  }
+});
+
 app
   .route("/transactions")
   .get((req, res) => {
