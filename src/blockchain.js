@@ -149,7 +149,7 @@ const findBlock = (index, previousHash, timestamp, data, difficulty) => {
   }
 };
 
-const hashMatchesDifficulty = (hash, difficulty) => {
+const hashMatchesDifficulty = (hash, difficulty = 0) => {
   const hashInBinary = hexToBinary(hash);
   const requiredZeros = "0".repeat(difficulty);
   console.log("Trying difficulty:", difficulty, "with hash", hashInBinary);
