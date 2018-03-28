@@ -69,7 +69,7 @@ const startP2PServer = server => {
   wsServer.on("error", () => {
     console.log("error");
   });
-  console.log("Nomadcoin P2P Server running");
+  console.log("SH-coin P2P Server running");
 };
 
 const initSocketConnection = ws => {
