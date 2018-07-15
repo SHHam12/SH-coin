@@ -1,5 +1,5 @@
 const WebSockets = require("ws"),
-  Mempool = require("./mempool"),
+  Mempool = require("./memPool"),
   Blockchain = require("./blockchain");
 
 const {

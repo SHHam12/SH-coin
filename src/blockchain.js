@@ -1,7 +1,7 @@
 const CryptoJS = require("crypto-js"),
   _ = require("lodash"),
   Wallet = require("./wallet"),
-  Mempool = require("./mempool"),
+  Mempool = require("./memPool"),
   Transactions = require("./transactions"),
   hexToBinary = require("hex-to-binary");
 

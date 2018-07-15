@@ -18,7 +18,11 @@
     "morgan": "^1.9.0",
     "ws": "^5.0.0"
   },
+  "engines": {
+    "node": "10.2.1"
+  },
   "scripts": {
-    "dev": "nodemon src/server.js"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
   }
 }

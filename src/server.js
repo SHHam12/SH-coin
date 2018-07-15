@@ -5,7 +5,7 @@ const express = require("express"),
   morgan = require("morgan"),
   Blockchain = require("./blockchain"),
   P2P = require("./p2p"),
-  Mempool = require("./mempool"),
+  Mempool = require("./memPool"),
   Wallet = require("./wallet");
 
 const { 
@@ -19,7 +19,7 @@ const { startP2PServer, connectToPeers } = P2P;
 const { initWallet, getPublicFromWallet, getBalance } = Wallet;
 const { getMempool } = Mempool;
 
-const PORT = process.env.HTTP_PORT || 4000;
+const PORT = process.env.HTTP_PORT || process.env.PORT || 4000;
 
 const app = express();
 app.use(bodyParser.json());
